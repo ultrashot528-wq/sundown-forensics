@@ -1,0 +1,23 @@
+Okay, thank you for using Sundown.
+This tool...making it was actually harder than juggling knives while doing the Pantheon of Hallownest while reading a wireshark graph.
+In simple terms, it was NOT easy.
+This is a Blue team tool, of course.
+It started as a simple, as I called it, file dissector.
+It once grabbed some simple sha256 hashes, metadata, and all that.
+But then I started making it grab more advanced stuff (eg, inodes).
+And then I realized--it was turning into a literal digital forensics tool.
+So I added more, and more, and more, and spent MONTHS, like 8 months I think, making it.
+
+And now it is a monolithic digital forensics tool. I don't even know what to call it, it does a ton of things.
+Though I am leaning toward red teaming, I am aware of what your usual blue team has to do when under attack.
+They need to answer three questions within 5 minutes.
+1. Is the threat enemy actively inside the machine?
+2. If they are, how do they have persistence?
+3. What data or artifacts did they forget to scrub?
+And it can do all of that. Okay, I know it has its flaws, like an unholy amount of comments (#)
+And that it's not a prompt, and you must run it like 8 times to do a massive recovery.
+And the amount of imports it has.
+But, it's beautiful in my eyes!
+I hope you use it. Also, credit to patorjk's website for that banner! LOVE that he had a 'Copy to python script' option.
+Support that guy!
+Anyways, -h for help with the script. ENJOY

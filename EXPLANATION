@@ -1,0 +1,53 @@
+
+What It Actually Does
+
+
+Live Triage (-t)
+
+It sweeps the system fast to see who is on the machine and how they are trying to stay there.
+• Pulls History Logs: Looks up every user on the box and grabs their last 20 terminal commands from .bash_history or .zsh_history.
+• Audits Cron Jobs: Checks /etc/crontab, /etc/cron.d, and user crontabs to find active scheduled tasks while ignoring blank space and comment lines.
+
+Ghost Process Resurrection (Runs with -t)
+
+This is the "Lay on Hands" module for catching malware that deletes itself right after starting.
+• Finds Deleted Binaries: Crawls through /proc to find any process running from an unlinked path marked as (deleted).
+• Sniffs the Command Line: Unpacks the arguments from /proc/[PID]/cmdline, strips out the messy null bytes, and prints exactly what command started it.
+• Pulls Files from the Void: Clones the executing binary directly out of memory and saves it as a healthy .bin file before the process can close.
+
+Process Memory Dumper (-m [PID])
+
+Rips the virtual memory straight out of a running program to catch hidden configurations or plain-text strings.
+• Maps out Memory: Reads /proc/[PID]/maps to find where the heap, stack, and readable segments are hiding.
+• Dumps Raw Data: Streams /proc/[PID]/mem, strips out empty zeroed blocks to save space, and dumps out the raw segments labeled by their original system name.
+
+Raw Drive Carver (-c)
+
+Sweeps raw storage streams or whole drives (like /dev/sda) to salvage deleted files based on their bytes.
+• Sliding-Window Stream: Reads files in massive 4MB chunks, passing lingering data down a queue so files split across sectors don't get clipped.
+• Extension-Agnostic Hunting: Looks at raw magic bytes, completely ignoring the file name. It tracks down ELF, PNG, JPEG, PDF, ZIP, and scripts (#!). It explicitly flags Windows MZ binaries as suspicious on Linux.
+• Slices by the Footer: Uses precise markers (like %%EOF for PDFs) to cut the file exactly where it ends.
+
+Deep File Dissector (-a and -r)
+
+An on-demand file inspection dashboard that bypasses filename tricks.
+• Calculates Entropy: Scores a file's data density up to 8.0 to instantly flag if a file is packed, encrypted, or compressed.
+• Grabs Hashes & Metadata: Runs a 64KB block loop for SHA-256 signatures and pulls permissions, ownership, and inodes.
+• Checks Low-Level Flags: Uses kernel ioctl and xattr calls to expose hidden filesystem attributes like the Immutable (+i) and Append-only (+a) modifiers.
+
+The Command Line Switches
+
+• target: The path to a file, directory, or raw block device (like /dev/sdb).
+• -h: Standard help screen.
+• -a: Turns on advanced mode to print deep filesystem stats and attributes.
+• -r: Crawls folders recursively when target is a directory.
+• -c: Starts up the raw byte carver on your target device.
+• -m [PID]: Targets a single Process ID and dumps its memory segments.
+• -t: Performs the live system triage check and runs the ghost binary resurrection engine.
+• -o: Sets your custom output folder (Defaults to forensic_output).
+
+
+
+
+This code took a while to write, but it's obviously not perfect. 
+If you need any help using it, or want to fix an issue, just contact me.

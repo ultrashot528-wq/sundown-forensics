@@ -68,8 +68,8 @@ def detect_real_file_type(file_path):
 # i genuinely HATED MAKING THIS.
 # Is it necessary? A lot of sources say so.
 # but GOD dude this made me tweak. I am fine with doing basic math, which this is, but wow.
-# Interestingly enough, it apparently works well, though i gave it a meterpreter msfvenom file and entropy...
-# it only hit 9.
+# Interestingly enough, it apparently works well, i gave it a meterpreter msfvenom file and entropy...
+# it hit about a 6 i believe. When encoded, an 8.
 def calculate_entropy(file_path):
     try:
         byte_counts = Counter()
@@ -160,32 +160,43 @@ def carve_raw_device(dev_path, output_dir):
                     start_pos = buffer.find(head_bytes)
                     while start_pos != -1:
                         absolute_match_offset = global_offset - len(leftover_bytes) + start_pos
+
                         if strict_zero and absolute_match_offset != 0:
                             start_pos = buffer.find(head_bytes, start_pos + 1)
                             continue
 
                         foot_bytes = FOOTER_SIGNATURES.get(name, b'')
                         carved_data = b''
+                        bytes_to_skip = len(head_bytes)  #step forward if carving fails
 
                         if foot_bytes:
                             end_pos = buffer.find(foot_bytes, start_pos)
                             if end_pos != -1:
                                 carved_data = buffer[start_pos:end_pos + len(foot_bytes)]
+                                bytes_to_skip = (end_pos + len(foot_bytes)) - start_pos
                             elif len(buffer) - start_pos > MAX_FILE_SIZE:
                                 carved_data = buffer[start_pos:start_pos + MAX_FILE_SIZE]
+                                bytes_to_skip = MAX_FILE_SIZE
                         else:
-                            if len(buffer) - start_pos > 51200:
-                                carved_data = buffer[start_pos:start_pos + 51200]
+
+                            fallback_size = 1048576 if name == "Executable" else 51200
+                            if len(buffer) - start_pos > fallback_size:
+                                carved_data = buffer[start_pos:start_pos + fallback_size]
+                                bytes_to_skip = fallback_size
                             else:
                                 carved_data = buffer[start_pos:]
+                                bytes_to_skip = len(buffer) - start_pos
 
                         if carved_data:
-                            out_file = Path(output_dir) / f"carved_{absolute_match_offset}.bin"
+                            ext = ".png" if "PNG" in name else ".jpg" if "JPEG" in name else ".pdf" if "PDF" in name else ".zip" if "ZIP" in name else ".elf" if "Executable" in name else ".bin"
+                            out_file = Path(output_dir) / f"carved_{absolute_match_offset}{ext}"
                             with open(out_file, "wb") as f:
                                 f.write(carved_data)
                             print(f" [+] Extracted valid target signature [{name}] at offset {absolute_match_offset} -> {out_file}")
 
-                        start_pos = buffer.find(head_bytes, start_pos + len(head_bytes))
+                        # Had to fix here because the spamming bug.
+                        # Thank god for wildcards, sudo rm -f *.bin saved me after the bug
+                        start_pos = buffer.find(head_bytes, start_pos + bytes_to_skip)
 
                 global_offset += len(raw_chunk)
                 leftover_bytes = buffer[-MAX_FILE_SIZE:] if len(buffer) > MAX_FILE_SIZE else buffer
@@ -195,6 +206,8 @@ def carve_raw_device(dev_path, output_dir):
 
     except Exception as e:
         print(f"[-] Carver runtime execution aborted: {e}")
+
+
 # wow i cannot even begin to explain how easy this was compared to what i thought it would be after making...
 # that thing up there...
 def dump_proc_mem(pid, output_dir):

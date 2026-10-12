@@ -22,7 +22,7 @@ import math
 from collections import Counter
 from pathlib import Path
 
-# Windows check
+# i hate windows
 if os.name == "nt":
     print("[-] Error: This only works on Posix-like systems. And Windows sucks anyways.")
     print("I regret nothing.")

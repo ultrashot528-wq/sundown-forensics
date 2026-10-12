@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 #!/usr/bin/env bash
 if [ "$EUID" -ne 0 ]; then
   echo "[-] Error: Please run setup.sh as root (sudo ./setup.sh)"
